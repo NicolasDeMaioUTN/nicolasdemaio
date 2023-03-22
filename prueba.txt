@@ -1,7 +1,0 @@
-arbol
-casa
-hoja
-murcielago
-lancha
-barco
-helicoptero
