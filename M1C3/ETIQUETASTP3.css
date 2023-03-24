@@ -1,0 +1,78 @@
+body{background-image: URL("FONDO.JPG");
+}
+h1{
+    color: darkblue;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: x-large;
+    background-color: azure ;
+    text-align: center;
+    padding: 20px;
+    width: auto;
+    height: auto;
+    border: 1px solid black ;
+}
+h2{color: blueviolet;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: medium;
+    background-color: bisque;
+    text-align: left;
+    padding: 10px;
+    border: 1px dashed black;
+}
+h3{
+    color: black;
+    font-family: 'Lucida Sans';
+    background-color: white;
+    font-weight: bolder;
+    border-bottom: 1px double black;
+}
+p{font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: black;
+    background-color: gainsboro;
+    border: 1px black;
+    margin-left: 20px;
+    line-height: 30px;
+}
+#presentacion{background-color: aquamarine;
+            font-size: bold;
+            font-size: 20px;}
+img {display: flex;
+    margin-left: 10px;
+    position: relative; left: 5px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    image-rendering: auto;
+}
+.simona{    font-size: 20px;
+}
+li{background-color: rgba(207, 203, 203, 0.5);
+}
+.contenedor1{
+	height: auto; 
+	background-color:rgb(0, 0, 0,0.1);
+	position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: left;
+	align-items: flex-start;
+}
+.item1{
+	margin:0px;
+	font-size: 30px;
+    position: relative;
+    padding-top: center;
+    height: auto;
+	align-items: center;
+  
+}
+.item2{
+	margin-left: 10px;
+	font-size: 30px;
+	flex-wrap: nowrap;
+    border-left: 1px black solid;
+    position: relative;
+    height: auto;
+}
