@@ -57,6 +57,7 @@ li{background-color: rgba(207, 203, 203, 0.5);
     display: flex;
     flex-wrap: nowrap;
     justify-content: left;
+    padding: 10px;
 	align-items: flex-start;
 }
 .item1{
