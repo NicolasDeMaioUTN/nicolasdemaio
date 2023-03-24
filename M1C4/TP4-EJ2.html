@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP4-EJ2 - NICOLAS DE MAIO</title>
+</head>
+<body>
+<script>//EJERCICIO 2
+    var numero1 = parseInt(prompt('Ingrese un número para ser comparado'));
+    const array = [1,20,10,35,40,93,80,56,15];
+    let mayor = 0;
+    let i=0;
+
+    console.log (array.length);
+    document.write(`El numero ingresado fue ${numero1}. <br>`);
+    while (i<(array.length))
+         {if (mayor<(array[i])){
+            mayor = (array[i])
+            console.log(i);
+            console.log(mayor);}
+        ;i++}
+    if (numero1>mayor){
+        mayor=numero1;
+        document.write(`El numero mas grande es ${mayor}`);}
+    else {document.write(`El numero mas grande es ${mayor}.`);}
+</script>
+    
+
+</body>
+</html> 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP4-EJ1 - NICOLAS DE MAIO</title>
+</head>
+<body>
+<script> // EJERCICIO 1
+   var distancia = parseInt(prompt('Ingrese distancia'));
+   var respuesta = ['a pie','en bicicleta','en colectivo','en auto','en avión'];
+   var rango = 4;
+  
+   if  (Number.isNaN(distancia) && distancia<0)
+            {respuesta='Ingregre una distancia válida'
+            rango = 1
+            console.log(rango);
+            console.log(respuesta);}
+    else if (distancia >0 && distancia <=1000)
+            {rango = 0;
+                console.log(rango);
+                console.log(respuesta[rango]);}
+    else if (distancia >1000 && distancia <=10000)
+            {rango = 1;
+                console.log(rango);
+                console.log(respuesta[rango]);}
+    else if (distancia >10000 && distancia <=30000)
+            {rango = 2;
+                console.log(rango);
+                console.log(respuesta[rango]);}
+    else if (distancia >30000 && distancia <=100000)
+            {rango = 3;
+                console.log(rango);
+                console.log(respuesta[rango]);}
+     else if (distancia >100000)
+            {rango = 4;
+                console.log(rango);
+                console.log(respuesta[rango]);}
+
+</body>
+</html> 
