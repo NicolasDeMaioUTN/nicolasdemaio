@@ -1,14 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M2C2 - PRUEBA BOOSTRAP</title>
-    <link rel="javascript" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js ">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="M2C2.css">
 </head>
+
 <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="Logo ministerio positivo.png" alt="Bootstrap" width="18%" height="18%">
+            </a>
+        </div>
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Subsecrearía de Transporte
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Dirección Nacional de Transporte Automotor de
+                                    Pasajeros</a></li>
+                            <li><a class="dropdown-item" href="#">Dirección Nacional de Transporte Automotor de
+                                    Cargas</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#">Dirección de Supervisión y Control Financiero de
+                                    Transporte Automotor</a></li>
+                            <li><a class="dropdown-item" href="#">Dirección Gestión Económica de Transporte
+                                    Automotor</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#">Dirección Gestión de Permisos de Transporte Automotor
+                                    de
+                                    Pasajeros</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Subsercretaría de Transporte Automotor</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Pagos y Subsidios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Rendiciones de Fondos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Gestión de Permisos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="background-image: url('mt_jumbo_dic_2_0.jpg');">
+        <div class="container text-center">
+            <div class="row"></div>
+            <div class="row">
+                <p style="background-color: blue; color: aliceblue;font-size: 30px;">NUESTROS PROYECTOS</p>
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                LARGA DISTANCIA
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the first item's accordion body.</strong> Lorem, ipsum dolor sit amet
+                                consectetur adipisicing elit. Cum nostrum nemo a officia dolores aliquam blanditiis,
+                                voluptatem asperiores voluptatum saepe doloremque fugit fuga quaerat repudiandae
+                                dolorum quia vitae culpa cupiditate.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                ASISTENCIA A LAS PROVINCIAS
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the second item's accordion body.</strong> It is hidden by default,
+                                until the collapse plugin adds the appropriate classes that we use to style each
+                                element. These classes control the overall appearance, as well as the showing and
+                                hiding via CSS transitions. You can modify any of this with custom CSS or overriding
+                                our default variables. It's also worth noting that just about any HTML can go within
+                                the <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                AYUDA A LOS SECTORES MAS BULNERABLES
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <strong>This is the third item's accordion body.</strong> It is hidden by default,
+                                until the collapse plugin adds the appropriate classes that we use to style each
+                                element. These classes control the overall appearance, as well as the showing and
+                                hiding via CSS transitions. You can modify any of this with custom CSS or overriding
+                                our default variables. It's also worth noting that just about any HTML can go within
+                                the <code>.accordion-body</code>, though the transition does limit overflow.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <p style="background-color: blue; color: aliceblue;font-size: 30px;">OBJETIVOS CUMPLIDOS CUMPLIDOS</p>
+                <div class="card" style="width: 18rem;">
+                    <img src="UTA.jpg" class="card-img-top" alt="Acuerdo de aumento de salarios">
+                    <div class="card-body">
+                        <h5 class="card-title">Aumento del 40% del salario</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk
+                            of
+                            the card's content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Objetivo 2</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk
+                            of
+                            the card's content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Objetivo 3</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk
+                            of
+                            the card's content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <p style="background-color: blue; color: aliceblue;font-size: 30px;">NUESTRAS METAS</p>
+                <div id="carouselExampleCaptions" class="carousel slide">
+                    <div class="carousel-indicators">
+                      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    </div>
+                    <div class="carousel-inner">
+                      <div class="carousel-item active">
+                        <img src="tren bala.jpg" class="d-block w-100" alt="Nuevos trenes">
+                        <div class="carousel-caption d-none d-md-block">
+                          <h5>Vamos a mejorar los trenes</h5>
+                          <p>Con la compra de 10 trenes balas vamos a conecar todo el pais es una viaje que puede durar 8 horas desde Ushuaia a Jujuy </p>
+                        </div>
+                      </div>
+                      <div class="carousel-item">
+                        <img src="avionesok.jpg" class="d-block w-100" alt="Aviones verdes">
+                        <div class="carousel-caption d-none d-md-block">
+                          <h5>Apostamos por los combustibles ecologicos</h5>
+                          <p>Un gran porcentja de emisiones de CO2 provienen de los aviones. Apostamos por nuevas teconologías para reducir la huella ambiental.</p>
+                        </div>
+                      </div>
+                      <div class="carousel-item">
+                        <img src="tunel.jpg" class="d-block w-100" alt="Conexión de Tierra del Fuego vía terreste">
+                        <div class="carousel-caption d-none d-md-block">
+                          <h5>Vamos a conectar a Tierra del Fuego al continente</h5>
+                          <p>Con la construcción de un tunel submarino vamos a permitir acceder a la Provincia por vía terreste</p>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                    </button>
+                  </div>
+
+            </div>
+            
+        
     
+
+
 </body>
+
 </html>
