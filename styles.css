@@ -1,0 +1,384 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+#container {
+    display: flex;
+    flex-direction: row; /* Asegúrate de que los elementos se alineen horizontalmente */
+    height: 100vh; /* Asegura que el contenedor ocupe toda la altura visible */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    overflow: hidden;
+}
+
+.form-container {
+    display: none; /* Inicialmente oculto */
+    margin-top: 10px;
+}
+
+#map {
+    flex: 1; /* El mapa ocupa el espacio restante */
+    height: 100%; /* Se ajusta a la altura del contenedor */
+    width: 100%; /* Se ajusta al ancho del contenedor */
+    transition: width 0.5s ease-in-out; /* Transición suave cuando se ajusta el ancho */
+}
+
+
+/* Estilo de la barra lateral */
+.sidebar {
+    width: 5%; /* El ancho inicial es el 20% */
+    background-color: #f4f4f4;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.5s ease-in-out;
+    z-index: 1000;
+    position: relative;
+    height: 100%; /* Asegura que la barra lateral ocupe el 100% del alto */
+    flex: 0 0 15%; /* Asegura que tome un ancho fijo del 20% */
+}
+
+/* Contenido dentro de la barra lateral */
+#sidebar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+    transition: opacity 0.3s ease-in-out;
+    flex-grow: 1; /* Hace que el contenido ocupe todo el espacio restante */
+}
+
+/* Colapsar todo el contenido dentro de la barra lateral */
+.sidebar.collapsed #sidebar-content {
+    display: none; /* Oculta el contenido */
+    opacity: 0; /* Asegura que no sea visible */
+    pointer-events: none; /* Deshabilita la interacción con el contenido */
+}
+
+/* Estado colapsado de la barra lateral */
+.sidebar.collapsed {
+    width: 5%; /* Cambiar el ancho al 5% */
+    padding: 5px; /* Cambiar el padding */
+    transition: width 0.5s ease-in-out;
+    flex: 0 0 2%; /* Ajustar el flex cuando se colapsa */
+}
+
+/* Estilo del botón de colapso */
+.collapse-btn {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo del botón de colapso al hacer hover */
+.collapse-btn:hover {
+    color: #4CAF50; /* Cambia el color cuando se pasa el mouse */
+    transition: color 0.3s ease;
+}
+
+/* Estilo para los títulos h2 y h3 */
+h2, h3 {
+    color: #333;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Estilo del formulario */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Estilo para las etiquetas del formulario */
+label {
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Estilo de los campos de texto */
+input[type="text"],
+textarea,
+select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    width: 100%; /* Asegura que los campos ocupen todo el ancho disponible */
+    box-sizing: border-box; /* Para incluir padding en el cálculo del ancho */
+}
+
+/* Estilo de los botones dentro de los formularios */
+button[type="submit"] {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo de los botones al hacer hover */
+button[type="submit"]:hover {
+    background-color: #45a049; /* Un verde más oscuro al pasar el mouse */
+}
+
+/* Estilo para los campos de texto al hacer focus */
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #4CAF50; /* Cambia el color del borde al hacer focus */
+    outline: none; /* Elimina el contorno predeterminado del navegador */
+}
+
+/* Estilo de los campos de texto al hacer hover */
+input[type="text"]:hover,
+textarea:hover,
+select:hover {
+    border-color: #ccc; /* Cambia el color del borde al pasar el mouse */
+}
+
+/* Estilo de los formularios vacíos con enfoque en accesibilidad */
+input[required]:invalid,
+textarea[required]:invalid,
+select[required]:invalid {
+    border-color: red; /* Bordes rojos para los campos obligatorios */
+}
+
+/* Estilo de las opciones del select */
+select option {
+    padding: 10px;
+}
+
+/* Estilos generales del formulario emergente */
+#popup-form {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    border-radius: 8px; /* Bordes más redondeados */
+    z-index: 1000;
+    border: 1px solid #ccc;
+    width: 80%; /* Ocupa el 80% del ancho */
+    max-width: 600px; /* Limita el ancho máximo */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Estilo general para el formulario */
+#popup-form form {
+    display: flex;
+    flex-direction: row; /* Alineación horizontal */
+    flex-wrap: wrap; /* Permite el ajuste en varias filas */
+    gap: 15px; /* Espaciado entre los elementos */
+    justify-content: space-between; /* Distribuye el espacio entre los campos */
+}
+
+/* Estilo para las etiquetas de los campos */
+#popup-form label {
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Estilo común para todos los campos de entrada */
+#popup-form input, 
+#popup-form textarea, 
+#popup-form select {
+    width: 48%; /* Dos elementos por fila */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Estilo para el campo de texto (textarea) */
+#popup-form textarea {
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
+    height: 100px; /* Altura fija */
+}
+
+/* Estilo al poner foco en los campos */
+#popup-form input:focus, 
+#popup-form textarea:focus, 
+#popup-form select:focus {
+    border-color: #4CAF50; /* Resalta el borde con verde */
+    outline: none; /* Elimina el borde de foco predeterminado */
+    background-color: #fff; /* Fondo blanco */
+}
+
+/* Estilos para los campos de latitud y longitud (readonly) */
+#stop_lat[readonly], 
+#stop_lon[readonly] {
+    background-color: #e9ecef; /* Fondo gris claro para los campos solo lectura */
+    cursor: not-allowed; /* Cursor para indicar que no se pueden editar */
+    color: #6c757d; /* Texto gris para los campos no editables */
+}
+
+/* Estilo de los botones */
+#popup-form button {
+    padding: 12px 18px;
+    border-radius: 5px;
+    border: none;
+    background-color: #4CAF50; /* Color verde */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px; /* Separación superior */
+}
+
+/* Estilo de los botones al pasar el mouse sobre ellos */
+#popup-form button:hover {
+    background-color: #45a049; /* Color verde más oscuro al hacer hover */
+}
+
+/* Estilo del botón de cancelar (color rojo) */
+#popup-form button[type="button"] {
+    background-color: #f44336; /* Color rojo para el botón de cancelar */
+}
+
+#popup-form button[type="button"]:hover {
+    background-color: #d32f2f; /* Rojo más oscuro al hacer hover */
+}
+
+/* Opcional: Estilo para el formulario oculto */
+.hidden {
+    display: none; /* Oculta el formulario emergente */
+}
+
+
+/* Estilo general del formulario */
+#stop-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espacio entre los campos */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra para resaltar el formulario */
+    max-width: 500px;
+    margin: 0 auto; /* Centra el formulario en la página */
+}
+
+/* Estilo de las etiquetas del formulario */
+#stop-form label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Estilo para los campos de entrada (textos, textarea, etc.) */
+#stop-form input[type="text"],
+#stop-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    width: 100%; /* Asegura que los campos ocupen todo el ancho disponible */
+    box-sizing: border-box; /* Incluye padding en el cálculo del ancho */
+}
+
+/* Estilo para los campos de texto en readonly */
+#stop-form input[readonly] {
+    background-color: #f0f0f0; /* Fondo gris claro para campos de solo lectura */
+    cursor: not-allowed; /* Cambia el cursor a no permitido */
+}
+
+/* Estilo para las filas del formulario */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre la etiqueta y el campo */
+}
+
+/* Estilo de los botones de acción */
+.form-actions {
+    display: flex;
+    justify-content: space-between; /* Los botones se distribuyen en los extremos */
+    gap: 10px; /* Espacio entre los botones */
+}
+
+/* Estilo de los botones de acción */
+#stop-form button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+}
+
+/* Estilo del botón Guardar */
+#stop-form button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Estilo del botón Guardar al hacer hover */
+#stop-form button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Estilo del botón Cancelar */
+#stop-form #cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Estilo del botón Cancelar al hacer hover */
+#stop-form #cancel:hover {
+    background-color: #e53935;
+}
+
+/* Estilo de los campos al hacer focus */
+#stop-form input[type="text"]:focus,
+#stop-form textarea:focus {
+    border-color: #4CAF50; /* Cambia el color del borde al hacer focus */
+    outline: none; /* Elimina el contorno predeterminado del navegador */
+}
+
+/* Estilo de los campos al hacer hover */
+#stop-form input[type="text"]:hover,
+#stop-form textarea:hover {
+    border-color: #ccc; /* Cambia el borde al pasar el mouse */
+}
+
+/* Estilo de los campos vacíos con enfoque en accesibilidad */
+#stop-form input[required]:invalid,
+#stop-form textarea[required]:invalid {
+    border-color: red; /* Bordes rojos para campos obligatorios no llenados */
+}
+
+/* Estilo del formulario de texto largo (textarea) */
+#stop-form textarea {
+    resize: vertical; /* Permite cambiar el tamaño vertical del campo */
+    min-height: 100px;
+}
+
+
+button {
+    margin-top: 10px;
+}

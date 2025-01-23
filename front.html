@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestion de Paradas - #DNDT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+       
+    <!-- CDN correcto para h3-js (para navegador) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@unmapped/h3-js@3.7.3/dist/h3-js.umd.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/h3-js@3.7.0/dist/browser/h3-js.min.js"></script> -->
+
+</head>
+
+<body>
+    <div id="container">
+        <!-- Barra lateral --> 
+        <div id="sidebar" class="sidebar">
+            <button id="toggleSidebar" class="collapse-btn">☰</button>
+            <div id="sidebar-content">
+                <h2>Gestión de Paradas</h2>
+    
+                <button onclick="toggleForm('modifyStopContainer')">Modificar Paradas</button>
+                <div id="modifyStopContainer" class="form-container">
+                    <h3>Modificar Paradas</h3>
+                    <form id="ModifyStopForm">
+                        <label for="stopName">Nombre de la parada:</label>
+                        <input type="text" id="stopName" name="stopName" required>
+    
+                        <label for="stopDesc">Descripción:</label>
+                        <textarea id="stopDesc" name="stopDesc"></textarea>
+    
+                        <label for="locationType">Tipo de Parada:</label>
+                        <select id="locationType" name="locationType" required>
+                            <option value="0">Parada Normal</option>
+                            <option value="1">Intercambiador</option>
+                            <option value="2">Estación</option>
+                        </select>
+    
+                        <button type="submit">Guardar</button>
+                    </form>
+                </div>
+    
+                <button onclick="toggleForm('deleteStopContainer')">Borrar Paradas</button>
+                <div id="deleteStopContainer" class="form-container">
+                    <h3>Borrar Paradas</h3>
+                    <form id="deleteStopForm">
+                        <label for="stopNameDelete">Nombre de la parada:</label>
+                        <input type="text" id="stopNameDelete" name="stopNameDelete" required>
+    
+                        <button type="submit">Borrar</button>
+                    </form>
+                </div>
+    
+                <button onclick="toggleForm('assignLinesContainer')">Asignación de Paradas por Línea</button>
+                <div id="assignLinesContainer" class="form-container">
+                    <h3>Asignación de Paradas por Línea</h3>
+                    <form id="assignLinesForm">
+                        <label for="lineId">ID de Línea:</label>
+                        <input type="text" id="lineId" name="lineId" required>
+                        <button type="submit">Asignar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Mapa -->
+        <div id="map"></div>
+    
+        <!-- Formulario emergente -->
+        <div id="popup-form" class="hidden">
+            <h3>Crear Parada</h3>
+            <form id="stop-form">
+                <label for="stop_name">Nombre de Parada:</label>
+                <input type="text" id="stop_name" name="stop_name" required>
+    
+                <label for="stop_desc">Descripción de la Parada:</label>
+                <textarea id="stop_desc" name="stop_desc"></textarea>
+    
+                <label for="locationType">Tipo de Parada:</label>
+                <select id="locationType" name="locationType" required>
+                    <option value="0">Parada Normal</option>
+                    <option value="1">Intercambiador</option>
+                    <option value="2">Estación</option>
+                </select>
+    
+                <div class="form-row">
+                    <label for="stop_lat">Latitud:</label>
+                    <input type="text" id="stop_lat" name="stop_lat" readonly>
+                </div>
+    
+                <div class="form-row">
+                    <label for="stop_lon">Longitud:</label>
+                    <input type="text" id="stop_lon" name="stop_lon" readonly>
+                </div>
+    
+                <div class="form-actions">
+                    <button type="submit">Guardar Parada</button>
+                    <button type="button" id="cancel">Cancelar Parada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+
+</body>
+
+</html>
