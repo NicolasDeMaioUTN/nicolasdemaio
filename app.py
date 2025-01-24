@@ -136,6 +136,3 @@ def obtener_paradas():
 if __name__ == '__main__':
     socketio.run(app, debug=True)
 
-lat, lon = 37.7749, -122.4194
-h3_index_python = h3.latlng_to_cell(lat, lon, 14)
-print(h3_index_python)

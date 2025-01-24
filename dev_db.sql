@@ -109,10 +109,10 @@ DECLARE
     calculated_h3_index VARCHAR(15);
 BEGIN
     -- Calcular el índice H3 basado en las coordenadas
-    calculated_h3_index := h3_geo_to_h3(NEW.stop_lat, NEW.stop_lon, 14); -- usamos hexagonos 14 con area maxima de 7 m2 y min de 3m2
+    calculated_h3_index := h3_lat_lng_to_cell (POINT(NEW.stop_lon,NEW.stop_lat), 14); -- usamos hexagonos 14 con area maxima de 7 m2 y min de 3m2
     -- Comparar el índice calculado con el proporcionado
     IF NEW.h3_index <> calculated_h3_index THEN
-        RAISE EXCEPTION 'El índice H3 % no coincide con las coordenadas proporcionadas (calculado: %)', 
+        RAISE EXCEPTION 'El indice H3 % no coincide con las coordenadas proporcionadas (calculado: %)', 
                         NEW.h3_index, calculated_h3_index;
     END IF;
     -- Si coinciden, permitir la operación
@@ -125,5 +125,6 @@ CREATE TRIGGER trigger_validate_h3_index
 BEFORE INSERT OR UPDATE ON stops
 FOR EACH ROW
 EXECUTE FUNCTION validate_h3_index();
+
 
 
