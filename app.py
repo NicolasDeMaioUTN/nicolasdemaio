@@ -24,6 +24,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 db = SQLAlchemy(app)
 
 class Stop(db.Model):
+    __tablename__ = 'stops'  # O asegúrate de que coincida con la tabla en la BD
+
     stop_id = db.Column(db.Integer, primary_key=True)
     h3_index = db.Column(db.String(15), nullable=False, unique=True)
     stop_name = db.Column(db.String(100), nullable=False)
@@ -56,8 +58,6 @@ def test_database_connection():
     except Exception as e:
         return jsonify({'error': 'Error al conectar con la base de datos: ' + str(e)}), 500
 
-
-from geoalchemy2.elements import WKTElement
 
 @app.route('/api/paradas', methods=['POST'])
 def crear_parada():
@@ -105,6 +105,7 @@ def crear_parada():
             stop_desc=descripcion,
             stop_lat=lat,
             stop_lon=lon,
+            location_type=tipo,
             h3_index=h3_index,
             geom=geom
         )

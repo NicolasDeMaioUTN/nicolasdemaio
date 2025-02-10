@@ -1,80 +1,85 @@
-//#region Map
-    const mapElement = document.getElementById('map');
-    if (mapElement) {
-        // Inicializar el mapa
-        const map = L.map('map', {
-            center: [-34.622064, -58.43552], // Coordenadas iniciales (AMBA)
-            zoom: 10,
-            minZoom: 10, // Establecer el zoom mínimo permitido
-            maxZoom: 18, // Opcional: establecer el zoom máximo
-            maxBounds: [[-35.2, -59.5], [-34.3, -57.9]], // Límites del área
-            maxBoundsViscosity: 1.0, // Asegura que el mapa no pueda ir fuera de los límites
-        });
-
-        // Agregar capa base
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Deshabilitar zoom out fuera de la zona permitida
-        map.on('zoomend', function () {
-            if (!map.getBounds().contains(map.getCenter())) {
-                map.setZoom(map.getZoom() - 1); // Si el mapa está fuera de los límites, deshacer el zoom out
-            }
-        });
-
-        // Deshabilito clicks por fuera del area
-        map.on('mousemove', function (e) {
-            if (!map.getBounds().contains(e.latlng)) {
-                map.dragging.disable();
-            } else {
-                map.dragging.enable();
-            }
-        });
-        
-        // Manejar clic derecho en el mapa
-        map.on('contextmenu', function (e) {
-            console.log('LatLng del clic:', e.latlng);
-            console.log('Límites del mapa:', map.getBounds());
-
-            if (!map.getBounds().contains(e.latlng)) {
-                alert("El punto seleccionado está fuera del AMBA. Por favor, selecciona un punto dentro del área permitida.");
-            } else {
-                selectedLatLng = e.latlng;
-
-                const popupForm = document.getElementById('popup-form');
-                document.getElementById('stop_lat').value = e.latlng.lat.toFixed(10);
-                document.getElementById('stop_lon').value = e.latlng.lng.toFixed(10);
-                popupForm.classList.remove('hidden');
-            }
-        });
-
-    } else {
-        console.error("El contenedor del mapa no se encontró en el DOM.");
-    }
-//#endregion
-
 // Referencias a elementos del DOM
+
+// Formularios
 const popupForm = document.getElementById('popup-form');
 const stopForm = document.getElementById('stop-form');
 const ModifyStopForm = document.getElementById('stop-form');
 const cancelButton = document.getElementById('cancel');
 
-let selectedLatLng = null; // Puntero de Latitud y Longitud
+//Barra Lateral
+const sidebar = document.getElementById('sidebar');
+const toggleSidebar = document.getElementById('toggleSidebar');
+let selectedLatLng = null;       // Puntero de Latitud y Longitud
 
-//#region Barra Lateral
-    // Barra lateral
-    const sidebar = document.getElementById('sidebar');
-    const toggleSidebar = document.getElementById('toggleSidebar');
-    toggleSidebar.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
+//#region Carga de Mapa e Inicio
+const mapElement = document.getElementById('map');
+if (mapElement) {
+    // Inicializar el mapa
+    const map = L.map('map', {
+        center: [-34.622064, -58.43552], // Coordenadas iniciales (AMBA)
+        zoom: 10,
+        minZoom: 10, // Establecer el zoom mínimo permitido
+        maxZoom: 18, // Opcional: establecer el zoom máximo
+        maxBounds: [[-35.2, -59.5], [-34.3, -57.9]], // Límites del área
+        maxBoundsViscosity: 1.0, // Asegura que el mapa no pueda ir fuera de los límites
     });
 
-        
-    function toggleForm(formId) {
-        const formContainer = document.getElementById(formId);
-        formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-    }
+    // Agregar capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© Registro de Paradas - DNDT#MTR'
+    }).addTo(map);
+
+    // Deshabilitar zoom out fuera de la zona permitida
+    map.on('zoomend', function () {
+        if (!map.getBounds().contains(map.getCenter())) {
+            map.setZoom(map.getZoom() - 1); // Si el mapa está fuera de los límites, deshacer el zoom out
+        }
+    });
+
+    // Deshabilito clicks por fuera del area
+    map.on('mousemove', function (e) {
+        if (!map.getBounds().contains(e.latlng)) {
+            map.dragging.disable();
+        } else {
+            map.dragging.enable();
+        }
+    });
+    
+    // Manejar clic derecho en el mapa
+    map.on('contextmenu', function (e) {
+        console.log('LatLng del clic:', e.latlng);
+        console.log('Límites del mapa:', map.getBounds());
+
+        if (!map.getBounds().contains(e.latlng)) {
+            alert("El punto seleccionado está fuera del AMBA. Por favor, selecciona un punto dentro del área permitida.");
+        } else {
+            selectedLatLng = e.latlng;
+            const popupForm = document.getElementById('popup-form');
+            document.getElementById('stop_lat').value = e.latlng.lat.toFixed(10);
+            document.getElementById('stop_lon').value = e.latlng.lng.toFixed(10);
+            popupForm.classList.remove('hidden');
+        }
+    });
+
+    cargarParadasGuardadas();  // Llamar la función para cargar paradas al iniciar
+
+} else {
+    console.error("El contenedor del mapa no se encontró en el DOM.");
+}
+//#endregion
+
+
+//#region Barra Lateral
+// Plegar barra lateral
+toggleSidebar.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+});
+
+// mostrar barra lateral    
+function toggleForm(formId) {
+    const formContainer = document.getElementById(formId);
+    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+}
 //#endregion
 
 //#region Formularios
@@ -138,7 +143,10 @@ stopForm.addEventListener('submit', async (event) => {
         if (response.ok) {
             const result = await response.json();
             console.log('Respuesta del servidor:', result);
+
             alert('Parada guardada exitosamente');
+            stopForm.reset();
+
         } else {
             const errorData = await response.text();
             console.error('Error en la respuesta:', errorData);
@@ -162,11 +170,6 @@ cancelButton.addEventListener('click', () => {
 //#region Capa de Paradas
 const socket = io();
 
-// Función para agregar puntos al mapa
-function agregarParada(parada) {
-    const marker = L.marker([parada.stop_lat, parada.stop_lon]).addTo(map);
-    marker.bindPopup(`<b>${parada.stop_name}</b><br>${parada.stop_desc}`);
-}
 
 // Prueba de conexión
 fetch('http://127.0.0.1:5000/api/test')
@@ -188,8 +191,43 @@ fetch('http://localhost:5000/api/paradas')
     })
     .catch(error => console.error('Error al obtener paradas:', error));
 
-// Escuchar actualizaciones en tiempo real
+
+    // Escuchar actualizaciones en tiempo real
 socket.on('nueva_parada', parada => {
     agregarParada(parada);
 });
 //#endregion
+
+
+// Cargar todas las paradas guardadas al iniciar la página
+async function cargarParadasGuardadas() {
+    try {
+        const response = await fetch('http://localhost:5000/api/paradas');
+        if (response.ok) {
+            const paradas = await response.json();
+            paradas.forEach(parada => agregarParada(parada));
+        } else {
+            console.error('Error al obtener las paradas guardadas');
+        }
+    } catch (error) {
+        console.error('Error en la solicitud:', error);
+    }
+}
+
+
+// Función para agregar un marcador con evento de detalles
+function agregarParada(parada) {
+    const marker = L.marker([parada.latitude, parada.longitude]).addTo(map);
+
+    // Evento para mostrar detalles al pasar el cursor
+    marker.on('mouseover', () => {
+        marker.bindPopup(`
+            <b>Nombre:</b> ${parada.name} <br>
+            <b>Detalles:</b> ${parada.description} <br>
+            <b>Tipo:</b> ${parada.tipo}
+        `).openPopup();
+    });
+    return marker;
+}
+
+
