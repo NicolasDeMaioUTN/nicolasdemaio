@@ -9,7 +9,6 @@ from config import DevelopmentConfig, ProductionConfig, configure_app
 from flask_cors import CORS
 
 
-
 # Inicialización de la aplicación Flask
 app = Flask(__name__)
 
@@ -24,12 +23,7 @@ configure_app(app, config_class)  # Asegúrate de que esta función esté config
 socketio = SocketIO(app, cors_allowed_origins="*")
 db = SQLAlchemy(app)
 
-# Modelo de la tabla 'stops'
-from geoalchemy2 import Geometry
-
 class Stop(db.Model):
-    __tablename__ = 'stops'
-    
     stop_id = db.Column(db.Integer, primary_key=True)
     h3_index = db.Column(db.String(15), nullable=False, unique=True)
     stop_name = db.Column(db.String(100), nullable=False)
@@ -37,20 +31,18 @@ class Stop(db.Model):
     stop_lat = db.Column(db.Float, nullable=False)
     stop_lon = db.Column(db.Float, nullable=False)
     location_type = db.Column(db.SmallInteger, nullable=True)
-    geom = db.Column(Geometry('POINT', srid=4326), nullable=False)  # Definir la columna geom
-    
-    __table_args__ = (
-        db.UniqueConstraint('h3_index', name='unique_h3_index'),
-    )
+    geom = db.Column(Geometry('POINT', srid=4326), nullable=False)
 
 
 @app.route('/')
 def home():
     return "Servidor para sistema de paradas!"
 
+
 @app.route('/api/test', methods=['GET'])
 def test_connection():
     return jsonify({'message': 'Conexión exitosa con el backend!'}), 200
+
 
 @app.route('/api/db-test', methods=['GET'])
 def test_database_connection():
@@ -64,7 +56,9 @@ def test_database_connection():
     except Exception as e:
         return jsonify({'error': 'Error al conectar con la base de datos: ' + str(e)}), 500
 
-# Ruta para manejar la creación de paradas
+
+from geoalchemy2.elements import WKTElement
+
 @app.route('/api/paradas', methods=['POST'])
 def crear_parada():
     try:
@@ -98,10 +92,12 @@ def crear_parada():
         except Exception as e:
             return jsonify({'error': 'Error inesperado al convertir a índice H3: ' + str(e)}), 500
 
-
         # Verificar si el índice H3 ya existe
         if Stop.query.filter_by(h3_index=h3_index).first():
             return jsonify({'error': 'Este hexágono ya está ocupado.'}), 400
+
+        # Crear el objeto geom usando WKTElement
+        geom = WKTElement(f'POINT({lon} {lat})', srid=4326)
 
         # Insertar la nueva parada usando SQLAlchemy
         nueva_parada = Stop(
@@ -109,7 +105,8 @@ def crear_parada():
             stop_desc=descripcion,
             stop_lat=lat,
             stop_lon=lon,
-            h3_index=h3_index
+            h3_index=h3_index,
+            geom=geom
         )
         db.session.add(nueva_parada)
         db.session.commit()
@@ -128,6 +125,7 @@ def crear_parada():
 
     except Exception as e:
         return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
+
 
 # Ruta para obtener todas las paradas
 @app.route('/api/paradas', methods=['GET'])
