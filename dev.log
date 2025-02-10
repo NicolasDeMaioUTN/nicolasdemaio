@@ -93,3 +93,5 @@
 2025-02-10 10:59:04,292 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 10:59:04] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -
 2025-02-10 11:05:29,025 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:05:29] "OPTIONS /api/paradas HTTP/1.1" 200 -
 2025-02-10 11:05:29,036 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:05:29] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -
+2025-02-10 11:31:30,345 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:31:30] "OPTIONS /api/paradas HTTP/1.1" 200 -
+2025-02-10 11:31:30,362 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:31:30] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -

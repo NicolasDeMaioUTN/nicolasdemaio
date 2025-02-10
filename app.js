@@ -90,46 +90,6 @@ let selectedLatLng = null; // Puntero de Latitud y Longitud
         }
     }
 
-    /*
-    // Manejar envío del formulario
-    ModifyStopForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        if (!selectedLatLng) { // se debe modificar para seleccionar una parada valida y existente
-            alert('Por favor selecciona un punto en el mapa.');
-            return;
-        }
-
-        const stopData = {
-            stop_name: document.getElementById('stop_name').value,
-            stop_desc: document.getElementById('stop_desc').value,
-            lat: selectedLatLng.lat,
-            lon: selectedLatLng.lng,
-        };
-
-        console.log('Datos de la parada:', stopData);
-
-        // Aquí se envían los datos al backend (ejemplo con fetch)
-        fetch('http://127.0.0.1:5000/api/paradas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(stopData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Parada creada:', data);
-                alert('Parada creada exitosamente.');
-            })
-            .catch(error => {
-                console.error('Error al crear la parada:', error);
-                alert('Hubo un error al crear la parada.');
-            });
-
-        // Ocultar el formulario
-        popupForm.classList.add('hidden');
-        ModifyStopForm.reset();
-   });
-   */
-
     // Cerrar formulario emergente
     document.getElementById('cancel').addEventListener('click', () => {
         document.getElementById('popup-form').classList.add('hidden');
@@ -146,6 +106,7 @@ let selectedLatLng = null; // Puntero de Latitud y Longitud
 
 
 //#region Guardado de Paradas
+
 // Evento para manejar el envío del formulario
 stopForm.addEventListener('submit', async (event) => {
     event.preventDefault();
