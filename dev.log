@@ -86,3 +86,10 @@
 2025-01-24 12:39:27,357 - werkzeug - INFO - 127.0.0.1 - - [24/Jan/2025 12:39:27] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -
 2025-01-24 12:44:11,809 - werkzeug - INFO - 127.0.0.1 - - [24/Jan/2025 12:44:11] "OPTIONS /api/paradas HTTP/1.1" 200 -
 2025-01-24 12:44:11,825 - werkzeug - INFO - 127.0.0.1 - - [24/Jan/2025 12:44:11] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -
+2025-02-10 10:58:35,608 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-02-10 10:58:35,608 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-10 10:59:04,132 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 10:59:04] "OPTIONS /api/paradas HTTP/1.1" 200 -
+2025-02-10 10:59:04,292 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 10:59:04] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -
+2025-02-10 11:05:29,025 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:05:29] "OPTIONS /api/paradas HTTP/1.1" 200 -
+2025-02-10 11:05:29,036 - werkzeug - INFO - 127.0.0.1 - - [10/Feb/2025 11:05:29] "[35m[1mPOST /api/paradas HTTP/1.1[0m" 500 -

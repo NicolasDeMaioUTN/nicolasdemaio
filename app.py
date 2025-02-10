@@ -5,6 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 from config import DevelopmentConfig, ProductionConfig, configure_app
 from flask_cors import CORS
+from geoalchemy2 import Geometry
+from geoalchemy2.elements import WKTElement
+
 
 # Inicialización de la aplicación Flask
 app = Flask(__name__)
@@ -21,14 +24,24 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 db = SQLAlchemy(app)
 
 # Modelo de la tabla 'stops'
+from geoalchemy2 import Geometry
+
 class Stop(db.Model):
     __tablename__ = 'stops'
+    
     stop_id = db.Column(db.Integer, primary_key=True)
-    stop_name = db.Column(db.String(255))
-    stop_desc = db.Column(db.String(255))
-    stop_lat = db.Column(db.Float)
-    stop_lon = db.Column(db.Float)
-    h3_index = db.Column(db.String(15))
+    h3_index = db.Column(db.String(15), nullable=False, unique=True)
+    stop_name = db.Column(db.String(100), nullable=False)
+    stop_desc = db.Column(db.String(140))
+    stop_lat = db.Column(db.Float, nullable=False)
+    stop_lon = db.Column(db.Float, nullable=False)
+    location_type = db.Column(db.SmallInteger, nullable=True)
+    geom = db.Column(Geometry('POINT', srid=4326), nullable=False)  # Definir la columna geom
+    
+    __table_args__ = (
+        db.UniqueConstraint('h3_index', name='unique_h3_index'),
+    )
+
 
 @app.route('/')
 def home():
