@@ -2,11 +2,12 @@ import h3
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from geoalchemy2 import Geometry
+from geoalchemy2.elements import WKTElement
 from flask_socketio import SocketIO
 from config import DevelopmentConfig, ProductionConfig, configure_app
 from flask_cors import CORS
-from geoalchemy2 import Geometry
-from geoalchemy2.elements import WKTElement
+
 
 
 # Inicialización de la aplicación Flask
