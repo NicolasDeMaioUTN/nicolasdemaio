@@ -1,11 +1,9 @@
-// Referencias a elementos del DOM
-
 // Formularios
 const popupForm = document.getElementById('popup-form');
 const stopForm = document.getElementById('stop-form');
 const ModifyStopForm = document.getElementById('stop-form');
 const cancelButton = document.getElementById('cancel');
-
+var map; 
 //Barra Lateral
 const sidebar = document.getElementById('sidebar');
 const toggleSidebar = document.getElementById('toggleSidebar');
@@ -15,14 +13,15 @@ let selectedLatLng = null;       // Puntero de Latitud y Longitud
 const mapElement = document.getElementById('map');
 if (mapElement) {
     // Inicializar el mapa
-    const map = L.map('map', {
+    map = L.map('map', {
         center: [-34.622064, -58.43552], // Coordenadas iniciales (AMBA)
         zoom: 10,
         minZoom: 10, // Establecer el zoom mínimo permitido
-        maxZoom: 18, // Opcional: establecer el zoom máximo
         maxBounds: [[-35.2, -59.5], [-34.3, -57.9]], // Límites del área
         maxBoundsViscosity: 1.0, // Asegura que el mapa no pueda ir fuera de los límites
     });
+
+    cargarParadasGuardadas();    
 
     // Agregar capa base
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -47,9 +46,6 @@ if (mapElement) {
     
     // Manejar clic derecho en el mapa
     map.on('contextmenu', function (e) {
-        console.log('LatLng del clic:', e.latlng);
-        console.log('Límites del mapa:', map.getBounds());
-
         if (!map.getBounds().contains(e.latlng)) {
             alert("El punto seleccionado está fuera del AMBA. Por favor, selecciona un punto dentro del área permitida.");
         } else {
@@ -59,17 +55,17 @@ if (mapElement) {
             document.getElementById('stop_lon').value = e.latlng.lng.toFixed(10);
             popupForm.classList.remove('hidden');
         }
-    });
-
-    cargarParadasGuardadas();  // Llamar la función para cargar paradas al iniciar
-
+    });  
 } else {
     console.error("El contenedor del mapa no se encontró en el DOM.");
 }
+
+
 //#endregion
 
 
 //#region Barra Lateral
+
 // Plegar barra lateral
 toggleSidebar.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
@@ -82,29 +78,30 @@ function toggleForm(formId) {
 }
 //#endregion
 
+
 //#region Formularios
-    // Funcion para mostrar formularios
-    function togglePopupForm(show, latlng) {
-        if (show) {
-            popupForm.classList.remove('hidden');
-            document.getElementById('stop_lat').value = latlng.lat.toFixed(10);
-            document.getElementById('stop_lon').value = latlng.lng.toFixed(10);
-        } else {
-            popupForm.classList.add('hidden');
-            ModifyStopForm.reset();
-        }
-    }
-
-    // Cerrar formulario emergente
-    document.getElementById('cancel').addEventListener('click', () => {
-        document.getElementById('popup-form').classList.add('hidden');
-    });
-
-    // Manejar cancelación del formulario
-    cancelButton.addEventListener('click', function () {
+// Funcion para mostrar formularios
+function togglePopupForm(show, latlng) {
+    if (show) {
+        popupForm.classList.remove('hidden');
+        document.getElementById('stop_lat').value = latlng.lat.toFixed(10);
+        document.getElementById('stop_lon').value = latlng.lng.toFixed(10);
+    } else {
         popupForm.classList.add('hidden');
         ModifyStopForm.reset();
-    });
+    }
+}
+
+// Cerrar formulario emergente
+document.getElementById('cancel').addEventListener('click', () => {
+    document.getElementById('popup-form').classList.add('hidden');
+});
+
+// Manejar cancelación del formulario
+cancelButton.addEventListener('click', function () {
+    popupForm.classList.add('hidden');
+    ModifyStopForm.reset();
+});
 
     
 //#endregion
@@ -158,7 +155,6 @@ stopForm.addEventListener('submit', async (event) => {
     
 });
 
-
 // Evento para manejar la cancelación del formulario
 cancelButton.addEventListener('click', () => {
     popupForm.classList.add('hidden');
@@ -167,9 +163,9 @@ cancelButton.addEventListener('click', () => {
 
 //#endregion
 
+
 //#region Capa de Paradas
 const socket = io();
-
 
 // Prueba de conexión
 fetch('http://127.0.0.1:5000/api/test')
@@ -203,12 +199,13 @@ socket.on('nueva_parada', parada => {
 async function cargarParadasGuardadas() {
     try {
         const response = await fetch('http://localhost:5000/api/paradas');
-        if (response.ok) {
-            const paradas = await response.json();
-            paradas.forEach(parada => agregarParada(parada));
-        } else {
-            console.error('Error al obtener las paradas guardadas');
+        if (!response.ok) {
+            throw new Error('Error al obtener las paradas guardadas');
         }
+
+        const paradas = await response.json();
+
+        paradas.forEach(parada => agregarParada(parada));
     } catch (error) {
         console.error('Error en la solicitud:', error);
     }
@@ -217,17 +214,30 @@ async function cargarParadasGuardadas() {
 
 // Función para agregar un marcador con evento de detalles
 function agregarParada(parada) {
-    const marker = L.marker([parada.latitude, parada.longitude]).addTo(map);
+    if (typeof parada.stop_lat !== "number" || typeof parada.stop_lon !== "number") {
+        return;
+    }
 
-    // Evento para mostrar detalles al pasar el cursor
+    // Verificar que map está definido
+    if (typeof map === "undefined") {
+        return;
+    }
+
+    const marker = L.circleMarker([parada.stop_lat, parada.stop_lon], {
+        radius: 6,
+        color: "#ff7800",
+        fillColor: "#ff7800",
+        fillOpacity: 0.8
+    });
+
+    marker.addTo(map);  // Aquí puede ocurrir el error
+
     marker.on('mouseover', () => {
         marker.bindPopup(`
-            <b>Nombre:</b> ${parada.name} <br>
-            <b>Detalles:</b> ${parada.description} <br>
-            <b>Tipo:</b> ${parada.tipo}
+            <b>Nombre:</b> ${parada.stop_name} <br>
+            <b>Detalles:</b> ${parada.stop_desc}
         `).openPopup();
     });
+
     return marker;
 }
-
-
