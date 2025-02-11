@@ -59,13 +59,10 @@ if (mapElement) {
 } else {
     console.error("El contenedor del mapa no se encontró en el DOM.");
 }
-
-
 //#endregion
 
 
 //#region Barra Lateral
-
 // Plegar barra lateral
 toggleSidebar.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
@@ -102,13 +99,10 @@ cancelButton.addEventListener('click', function () {
     popupForm.classList.add('hidden');
     ModifyStopForm.reset();
 });
-
-    
 //#endregion
 
 
 //#region Guardado de Paradas
-
 // Evento para manejar el envío del formulario
 stopForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -140,14 +134,14 @@ stopForm.addEventListener('submit', async (event) => {
         if (response.ok) {
             const result = await response.json();
             console.log('Respuesta del servidor:', result);
-
-            alert('Parada guardada exitosamente');
+            alert('Parada guardada exitosamente!');
             stopForm.reset();
+            stopForm.classList.add('hidden');
 
         } else {
             const errorData = await response.text();
             console.error('Error en la respuesta:', errorData);
-            alert('Error al guardar la parada');
+            alert('Error al guardar la parada.');
         }
     } catch (error) {
         console.error('Error en la solicitud:', error);
@@ -165,9 +159,10 @@ cancelButton.addEventListener('click', () => {
 
 
 //#region Capa de Paradas
-const socket = io();
+const socket = io('http://localhost:5000'); // conecta al Flask
 
-// Prueba de conexión
+
+/* Prueba de conexión
 fetch('http://127.0.0.1:5000/api/test')
   .then(response => response.json())
   .then(data => {
@@ -176,7 +171,7 @@ fetch('http://127.0.0.1:5000/api/test')
   })
   .catch(error => {
     console.error('Error al conectar con el backend:', error);
-  });
+});*/
 
 
 // Obtener todas las paradas iniciales
@@ -187,8 +182,7 @@ fetch('http://localhost:5000/api/paradas')
     })
     .catch(error => console.error('Error al obtener paradas:', error));
 
-
-    // Escuchar actualizaciones en tiempo real
+// Escuchar actualizaciones en tiempo real
 socket.on('nueva_parada', parada => {
     agregarParada(parada);
 });
@@ -204,8 +198,7 @@ async function cargarParadasGuardadas() {
         }
 
         const paradas = await response.json();
-
-        paradas.forEach(parada => agregarParada(parada));
+        paradas.forEach(parada => agregarParada(parada));        
     } catch (error) {
         console.error('Error en la solicitud:', error);
     }
@@ -235,7 +228,8 @@ function agregarParada(parada) {
     marker.on('mouseover', () => {
         marker.bindPopup(`
             <b>Nombre:</b> ${parada.stop_name} <br>
-            <b>Detalles:</b> ${parada.stop_desc}
+            <b>Detalles:</b> ${parada.stop_desc} <br>
+            <b>Tipo:</b> ${parada.tipo}
         `).openPopup();
     });
 

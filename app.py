@@ -40,10 +40,11 @@ class Stop(db.Model):
 def home():
     return "Servidor para sistema de paradas!"
 
-
+#Ruta para pruebas de conexión
+"""
 @app.route('/api/test', methods=['GET'])
 def test_connection():
-    return jsonify({'message': 'Conexión exitosa con el backend!'}), 200
+    return jsonify({'message': 'Conexión exitosa con el backend!'}), 200/
 
 
 @app.route('/api/db-test', methods=['GET'])
@@ -57,8 +58,10 @@ def test_database_connection():
             return jsonify({'message': 'Conexión exitosa, pero la tabla está vacía.'}), 200
     except Exception as e:
         return jsonify({'error': 'Error al conectar con la base de datos: ' + str(e)}), 500
+"""
 
 
+# Ruta para guardar paradas
 @app.route('/api/paradas', methods=['POST'])
 def crear_parada():
     try:
@@ -112,15 +115,16 @@ def crear_parada():
         db.session.add(nueva_parada)
         db.session.commit()
 
-        # Emitir evento en tiempo real
-        socketio.emit('nueva_parada', {
+        # Emitir evento para actualizar en tiempo real
+        parada_json = {
             'stop_id': nueva_parada.stop_id,
             'stop_name': nueva_parada.stop_name,
             'stop_desc': nueva_parada.stop_desc,
             'stop_lat': nueva_parada.stop_lat,
             'stop_lon': nueva_parada.stop_lon,
             'h3_index': nueva_parada.h3_index
-        })
+        }
+        socketio.emit('nueva_parada', parada_json)
 
         return jsonify({'status': 'success', 'stop_id': nueva_parada.stop_id}), 201
 
