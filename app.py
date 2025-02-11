@@ -7,10 +7,18 @@ from geoalchemy2.elements import WKTElement
 from flask_socketio import SocketIO
 from config import DevelopmentConfig, ProductionConfig, configure_app
 from flask_cors import CORS
+from flask import Flask, jsonify, request
+from flask_jwt_extended import (
+    JWTManager, create_access_token, jwt_required, get_jwt_identity
+)
 
 
 # Inicialización de la aplicación Flask
 app = Flask(__name__)
+
+# Configuración de JWT
+app.config["JWT_SECRET_KEY"] = "tu_clave_secreta"  # Cambia esto por una clave segura
+jwt = JWTManager(app)
 
 # Permitir CORS para todos los orígenes
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -149,6 +157,29 @@ def obtener_paradas():
     except Exception as e:
         return jsonify({'error': 'Error al obtener las paradas: ' + str(e)}), 500
 
+
+#Loggin Geoserver
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    # Verifica las credenciales (esto es un ejemplo)
+    if username != "admin" or password != "password":
+        return jsonify({"msg": "Credenciales inválidas"}), 401
+
+    # Crea un token de acceso
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+
+# Verificacion token
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    # Obtiene la identidad del usuario desde el token
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

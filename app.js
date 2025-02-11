@@ -207,31 +207,75 @@ async function cargarParadasGuardadas() {
 
 // Función para agregar un marcador con evento de detalles
 function agregarParada(parada) {
+
     if (typeof parada.stop_lat !== "number" || typeof parada.stop_lon !== "number") {
+        console.error("Error: parada sin coordenadas válidas", parada);
         return;
     }
 
-    // Verificar que map está definido
-    if (typeof map === "undefined") {
-        return;
-    }
+    const geojsonFeature = {
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [parada.stop_lon, parada.stop_lat]  // GeoJSON usa [longitud, latitud]
+        },
+        "properties": {
+            "name": parada.stop_name,
+            "description": parada.stop_desc
+        }
+    };
 
-    const marker = L.circleMarker([parada.stop_lat, parada.stop_lon], {
-        radius: 6,
-        color: "#ff7800",
-        fillColor: "#ff7800",
-        fillOpacity: 0.8
-    });
-
-    marker.addTo(map);  // Aquí puede ocurrir el error
-
-    marker.on('mouseover', () => {
-        marker.bindPopup(`
-            <b>Nombre:</b> ${parada.stop_name} <br>
-            <b>Detalles:</b> ${parada.stop_desc} <br>
-            <b>Tipo:</b> ${parada.tipo}
-        `).openPopup();
-    });
+    const marker = L.geoJSON(geojsonFeature, {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, {
+                radius: 6,
+                color: "#0078ff",
+                fillColor: "#0078ff",
+                fillOpacity: 0.8
+            });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(`
+                <b>Nombre:</b> ${feature.properties.name} <br>
+                <b>Detalles:</b> ${feature.properties.description}
+            `);
+        }
+    }).addTo(map);
 
     return marker;
 }
+
+//#region Loggin en  Geoserver
+// Ejemplo de inicio de sesión
+async function login(username, password) {
+    const response = await fetch('http://tuservidor/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+        localStorage.setItem('token', data.access_token);  // Almacena el token
+    } else {
+        console.error('Error:', data.msg);
+    }
+}
+
+async function fetchProtectedData() {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://tuservidor/protected', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    const data = await response.json();
+    if (response.ok) {
+        console.log('Datos protegidos:', data);
+    } else {
+        console.error('Error:', data.msg);
+    }
+}
+//#endregion
