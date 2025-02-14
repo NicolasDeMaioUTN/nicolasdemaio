@@ -1,0 +1,14 @@
+cd C:\Users\Nico\Documents\SISTEMA GTFS\Proyecto Paradas
+
+.venv\Scripts\activate
+
+pip freeze > requirements.txt
+
+set FLASK_APP=app.py
+
+set FLASK_ENV=development
+
+flask run
+
+
+// para finalizar Flask usar Control + C

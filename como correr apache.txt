@@ -1,0 +1,50 @@
+-- Correr de manera manual
+& "C:Apache24\bin\httpd.exe"
+
+--Verificar el estado del servicio
+sc query proyecto_paradas
+
+-- Iniciar servicio
+net start proyecto_paradas
+
+-- Detener servicio
+net stop proyecto_paradas
+
+-- Eliminar servicio
+sc delete proyecto_paradas
+
+-- Instalar servicio
+& "C:Apache\Apache24\bin\httpd.exe" -k install -n "proyecto_paradas"
+
+-- Log de errores
+C:Apache\Apache24\logs\erro.log
+
+-- Configuracon httpd.conf
+Define SRVROOT "C:/Apache/Apache24"
+ServerRoot "${SRVROOT}"
+PidFile "C:/Apache/Apache24/logs/httpd.pid"
+
+Listen 8080
+
+LoadModule wsgi_module "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas/.venv/Lib/site-packages/mod_wsgi/server/mod_wsgi.cp312-win_amd64.pyd"
+WSGIPythonHome "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas/.venv"
+
+<VirtualHost *:8080>
+    ServerName localhost
+    WSGIScriptAlias / "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas/wsgi.py"
+    
+    <Directory "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas">
+        Require all granted
+    </Directory>
+
+    Alias /static "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas/static"
+    <Directory "C:/Users/Nico/Documents/SISTEMA GTFS/Proyecto Paradas/static">
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+
+-- Buscar directorio
+cd C:\Apache24\bin
+.\httpd.exe -k install -n "proyecto_paradas"
+net start proyecto_paradas
