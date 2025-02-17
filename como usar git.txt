@@ -1,3 +1,20 @@
+git init -- crear repositorio
+git mv -- mover o renombrar archivo o directorio
+
+
+
 git add .
 git commit -m "Descripción de los cambios"
-git push
+git push -- Actualiza las referencias remotas
+
+git fetch descarga objetos y refencias de otro repositorio
+git pull descara e integra con otros reposirorioos o una rama local
+
+git help command
+
+// Corregir rama
+git pull origin main --rebase // trae los cambios más recientes desde GitHub y los combina con los locales
+git push origin main // hago nuevamente el push
+git push --force origin main // hago el push forzando todo
+
+

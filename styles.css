@@ -382,3 +382,28 @@ select option {
 button {
     margin-top: 10px;
 }
+
+/* Menu contextual */
+#context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+}
+
+#context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 5px;
+}
+
+#context-menu ul li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+#context-menu ul li:hover {
+    background: #f0f0f0;
+}
