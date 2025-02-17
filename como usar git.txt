@@ -17,4 +17,11 @@ git pull origin main --rebase // trae los cambios más recientes desde GitHub y 
 git push origin main // hago nuevamente el push
 git push --force origin main // hago el push forzando todo
 
+//verificar ramas disponibles
+git branch
 
+//cambiar rama
+git checkout main  --front-menu-contextual
+
+// traer cambios de la nueva rama
+git pull origin main
