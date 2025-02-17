@@ -14,7 +14,7 @@ net stop proyecto_paradas
 sc delete proyecto_paradas
 
 -- Instalar servicio
-& "C:Apache\Apache24\bin\httpd.exe" -k install -n "proyecto_paradas"
+& "C:Apache24\bin\httpd.exe" -k install -n "proyecto_paradas"
 
 -- Log de errores
 C:Apache\Apache24\logs\erro.log

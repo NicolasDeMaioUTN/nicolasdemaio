@@ -140,6 +140,80 @@ def crear_parada():
         return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
 
 
+# Ruta para modificar una parada existente
+@app.route('/api/paradas/<int:stop_id>', methods=['PUT'])
+def modificar_parada(stop_id):
+    try:
+        data = request.json
+
+        # Validación de datos
+        if not data:
+            return jsonify({'error': 'No se proporcionaron datos.'}), 400
+
+        # Buscar la parada en la base de datos
+        parada = Stop.query.get(stop_id)
+        if not parada:
+            return jsonify({'error': 'La parada no existe.'}), 404
+
+        # Obtener los datos de la solicitud
+        nombre = data.get('name', parada.stop_name)  # Si no se proporciona, se mantiene el valor actual
+        descripcion = data.get('description', parada.stop_desc)
+        tipo = data.get('tipo', parada.location_type)
+        lat = data.get('latitude', parada.stop_lat)
+        lon = data.get('longitude', parada.stop_lon)
+
+        # Verificar que lat y lon sean números válidos
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except ValueError:
+            return jsonify({'error': 'Latitud y longitud deben ser números válidos.'}), 400
+
+        # Convertir latitud y longitud a índice H3
+        try:
+            h3_index = h3.latlng_to_cell(lat, lon, 14)
+        except AttributeError as e:
+            return jsonify({'error': 'Error al convertir a índice H3: ' + str(e)}), 500
+        except Exception as e:
+            return jsonify({'error': 'Error inesperado al convertir a índice H3: ' + str(e)}), 500
+
+        # Verificar si otro registro ya usa el mismo índice H3
+        otra_parada = Stop.query.filter_by(h3_index=h3_index).first()
+        if otra_parada and otra_parada.stop_id != stop_id:
+            return jsonify({'error': 'Otra parada ya ocupa esta ubicación.'}), 400
+
+        # Crear el objeto geom usando WKTElement
+        geom = WKTElement(f'POINT({lon} {lat})', srid=4326)
+
+        # Actualizar los datos en la base de datos
+        parada.stop_name = nombre
+        parada.stop_desc = descripcion
+        parada.location_type = tipo
+        parada.stop_lat = lat
+        parada.stop_lon = lon
+        parada.h3_index = h3_index
+        parada.geom = geom
+
+        db.session.commit()
+
+        # Emitir evento para actualizar en tiempo real
+        parada_json = {
+            'stop_id': parada.stop_id,
+            'stop_name': parada.stop_name,
+            'stop_desc': parada.stop_desc,
+            'stop_lat': parada.stop_lat,
+            'stop_lon': parada.stop_lon,
+            'h3_index': parada.h3_index
+        }
+        socketio.emit('parada_actualizada', parada_json)
+
+        return jsonify({'status': 'success', 'message': 'Parada actualizada correctamente.'}), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
+
+#
+
 # Ruta para obtener todas las paradas
 @app.route('/api/paradas', methods=['GET'])
 def obtener_paradas():
@@ -156,6 +230,28 @@ def obtener_paradas():
         return jsonify(paradas_json)
     except Exception as e:
         return jsonify({'error': 'Error al obtener las paradas: ' + str(e)}), 500
+
+
+# Ruta para eliminar una parada existente
+@app.route('/api/paradas/<int:stop_id>', methods=['DELETE'])
+def eliminar_parada(stop_id):
+    try:
+        # Buscar la parada en la base de datos
+        parada = Stop.query.get(stop_id)
+        if not parada:
+            return jsonify({'error': 'La parada no existe.'}), 404
+
+        # Eliminar la parada de la base de datos
+        db.session.delete(parada)
+        db.session.commit()
+
+        # Emitir evento para actualizar en tiempo real
+        socketio.emit('parada_eliminada', {'stop_id': stop_id})
+
+        return jsonify({'status': 'success', 'message': 'Parada eliminada correctamente.'}), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
 
 
 #Loggin Geoserver
