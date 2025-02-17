@@ -163,55 +163,52 @@ stopForm.addEventListener('submit', async (event) => {
 
 
 //#region Modificacion de Paradas
-function modificarParada(h3Index) {
-    // Buscar el marcador correspondiente en la lista de paradas
-    const parada = paradas.find(p => p.h3_index === h3Index);
-    if (!parada) {
-        alert("No se encontró la parada seleccionada.");
-        return;
-    }
+async function modificarParada(parada) {
+    // Rellenar el formulario con la información actual de la parada
+    document.getElementById("stop_name").value = parada.stop_name;
+    document.getElementById("stop_desc").value = parada.stop_desc;
+    document.getElementById("locationType").value = parada.location_type;
+    document.getElementById("stop_lat").value = parada.stop_lat.toFixed(10);
+    document.getElementById("stop_lon").value = parada.stop_lon.toFixed(10);
 
-    // Llenar el formulario con los datos de la parada existente
-    document.getElementById('stop_name').value = parada.stop_name;
-    document.getElementById('stop_desc').value = parada.stop_desc;
-    document.getElementById('stop_lat').value = parada.stop_lat;
-    document.getElementById('stop_lon').value = parada.stop_lon;
-    document.getElementById('locationType').value = parada.location_type;
+    // Mostrar el formulario para modificar la parada
+    document.getElementById("popup-form").classList.remove("hidden");
 
-    // Mostrar el formulario de modificación
-    togglePopupForm(true, { lat: parada.stop_lat, lng: parada.stop_lon });
-
-    // Manejar el evento de actualización
-    document.getElementById('stop-form').onsubmit = async function (event) {
-        event.preventDefault();
-
-        const updatedParada = {
-            name: document.getElementById('stop_name').value,
-            description: document.getElementById('stop_desc').value,
-            tipo: document.getElementById('locationType').value,
-            latitude: parseFloat(document.getElementById('stop_lat').value),
-            longitude: parseFloat(document.getElementById('stop_lon').value)
+    // Agregar evento al botón de guardar cambios
+    document.getElementById("saveStopBtn").onclick = async function () {
+        const stopData = {
+            name: document.getElementById("stop_name").value,
+            description: document.getElementById("stop_desc").value,
+            tipo: document.getElementById("locationType").value,
+            latitude: parseFloat(document.getElementById("stop_lat").value),
+            longitude: parseFloat(document.getElementById("stop_lon").value),
         };
 
         try {
-            const response = await fetch(`/api/paradas/${h3Index}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedParada)
+            const response = await fetch(`http://127.0.0.1:5000/api/paradas/${parada.h3_index}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(stopData),
             });
 
             if (response.ok) {
-                alert("Parada modificada exitosamente.");
-                location.reload(); // Refrescar el mapa para reflejar cambios
+                const result = await response.json();
+                console.log("Parada modificada:", result);
+                alert("Parada modificada exitosamente!");
+                document.getElementById("popup-form").classList.add("hidden");
             } else {
-                const errorData = await response.json();
-                alert("Error al modificar la parada: " + errorData.error);
+                const errorData = await response.text();
+                console.error("Error en la respuesta:", errorData);
+                alert("Error al modificar la parada.");
             }
         } catch (error) {
-            console.error('Error en la solicitud:', error);
+            console.error("Error en la solicitud:", error);
         }
     };
 }
+
 //#endregion
 
 
@@ -219,22 +216,19 @@ function modificarParada(h3Index) {
 function eliminarParada(h3Index) {
     if (!confirm("¿Estás seguro de que deseas eliminar esta parada?")) return;
 
-    fetch(`/api/paradas/${h3Index}`, {
+    fetch(`http://127.0.0.1:5000/api/paradas/${h3Index}`, {
         method: 'DELETE',
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === "success") {
                 alert("Parada eliminada correctamente.");
 
-                // Eliminar el marcador del mapa
-                if (marcadores[h3Index]) {
-                    map.removeLayer(marcadores[h3Index]);
-                    delete marcadores[h3Index]; // Remover del objeto de referencia
-                }
-
-                // Eliminar de la lista de paradas
-                paradas = paradas.filter(p => p.h3_index !== h3Index);
             } else {
                 alert("Error al eliminar la parada: " + data.error);
             }
@@ -249,6 +243,10 @@ function eliminarParada(h3Index) {
 
 //#region Capa de Paradas
 const socket = io('http://localhost:5000'); // conecta al Flask
+socket.on("actualizar_paradas", (paradas) => {
+    console.log("Recibiendo actualización global de paradas:", paradas);
+    actualizarMapaConParadas(paradas);
+});
 
 /* Prueba de conexión
 fetch('http://127.0.0.1:5000/api/test')
@@ -269,25 +267,26 @@ fetch('http://localhost:5000/api/paradas')
     })
     .catch(error => console.error('Error al obtener paradas:', error));
 
-// Escuchar actualizaciones en tiempo real
-socket.on('nueva_parada', parada => {
-    agregarParada(parada);
-});
 
+    
 // Cargar todas las paradas guardadas al iniciar la página
-async function cargarParadasGuardadas() {
-    try {
-        const response = await fetch('http://localhost:5000/api/paradas');
-        if (!response.ok) {
-            throw new Error('Error al obtener las paradas guardadas');
-        }
+function actualizarMapaConParadas(paradas) {
+    // Eliminar todas las paradas actuales del mapa
+    Object.values(markers).forEach(marker => map.removeLayer(marker));
+    markers = {}; // Reiniciar objeto de marcadores
 
-        const paradas = await response.json();
-        paradas.forEach(parada => agregarParada(parada));
-    } catch (error) {
-        console.error('Error en la solicitud:', error);
-    }
+    // Agregar las nuevas paradas al mapa
+    paradas.forEach(parada => {
+        const marker = L.marker([parada.stop_lat, parada.stop_lon])
+            .addTo(map)
+            .bindPopup(`<b>${parada.stop_name}</b><br>${parada.stop_desc}`);
+
+        markers[parada.h3_index] = marker; // Guardar marcador en el objeto
+    });
+
+    console.log("Mapa actualizado con nuevas paradas");
 }
+
 
 // Función para agregar un marcador con evento de detalles
 function agregarParada(parada) {
@@ -368,7 +367,6 @@ async function fetchProtectedData() {
 
 
 //#region Funciones del Menu Contextual
-// Función para manejar las opciones del menú
 function handleMenuClick(action) {
     switch (action) {
         case "agregar":
@@ -392,29 +390,39 @@ function handleMenuClick(action) {
 // Buscar paradas por ubicacion 
 async function buscarParadaPorUbicacion(latlng, callback) {
     try {
-        const response = await fetch("/api/paradas");
+        const response = await fetch("http://127.0.0.1:5000/api/paradas");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const paradas = await response.json();
 
-        // cambiar logica por h3
+        const lat = parseFloat(latlng.lat);
+        const lon = parseFloat(latlng.lng);
 
-        // Buscar la parada más cercana
-        const paradaSeleccionada = paradas.find(parada =>
-            Math.abs(parada.stop_lat - latlng.lat) < 0.0001 &&
-            Math.abs(parada.stop_lon - latlng.lng) < 0.0001
-        );
+        if (isNaN(lat) || isNaN(lon)) {
+            throw new Error("Latitud o longitud no son números válidos.");
+        }
 
-        if (!paradaSeleccionada) {
-            alert("No hay ninguna parada en esta ubicación.");
+        // Convertir lat/lon a índice H3
+        const h3Index = h3.latLngToCell(lat, lon, 12);
+
+        // Buscar la parada correspondiente
+        const parada = paradas.find(p => p.h3_index === h3Index);
+
+        if (!parada) {
+            alert("No se encontró la parada seleccionada.");
             return;
         }
 
-        callback(paradaSeleccionada.h3_index);
+        // Llamar al callback con la parada completa
+        callback(parada);
     } catch (error) {
         console.error("Error al buscar parada:", error);
     }
 }
 
-// Acción: Agregar Parada
+
+// Acción: Agregar Paradas
 /*
 addStopBtn.addEventListener("click", function () {
     contextMenu.classList.add("hidden");

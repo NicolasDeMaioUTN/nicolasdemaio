@@ -97,7 +97,7 @@ def crear_parada():
 
         # Convertir latitud y longitud a índice H3
         try:
-            h3_index = h3.latlng_to_cell(lat, lon, 14)
+            h3_index = h3.latlng_to_cell(lat, lon, 12)
         except AttributeError as e:
             return jsonify({'error': 'Error al convertir a índice H3: ' + str(e)}), 500
         except Exception as e:
@@ -132,6 +132,7 @@ def crear_parada():
             'stop_lon': nueva_parada.stop_lon,
             'h3_index': nueva_parada.h3_index
         }
+        emitir_actualizacion_paradas()
         socketio.emit('nueva_parada', parada_json)
 
         return jsonify({'status': 'success', 'stop_id': nueva_parada.stop_id}), 201
@@ -141,62 +142,56 @@ def crear_parada():
 
 
 # Ruta para modificar una parada existente
-@app.route('/api/paradas/<int:stop_id>', methods=['PUT'])
-def modificar_parada(stop_id):
+@app.route('/api/paradas/<string:h3_index>', methods=['PUT'])
+def modificar_parada(h3_index):
     try:
         data = request.json
 
-        # Validación de datos
         if not data:
             return jsonify({'error': 'No se proporcionaron datos.'}), 400
 
-        # Buscar la parada en la base de datos
-        parada = Stop.query.get(stop_id)
+        # Buscar la parada existente
+        parada = Stop.query.filter_by(h3_index=h3_index).first()
         if not parada:
-            return jsonify({'error': 'La parada no existe.'}), 404
+            return jsonify({'error': 'Parada no encontrada.'}), 404
 
-        # Obtener los datos de la solicitud
-        nombre = data.get('name', parada.stop_name)  # Si no se proporciona, se mantiene el valor actual
-        descripcion = data.get('description', parada.stop_desc)
-        tipo = data.get('tipo', parada.location_type)
-        lat = data.get('latitude', parada.stop_lat)
-        lon = data.get('longitude', parada.stop_lon)
+        # Validar y actualizar los valores si se proporcionan
+        nombre = data.get('name')
+        descripcion = data.get('description')
+        tipo = data.get('tipo')
+        nueva_lat = data.get('latitude')
+        nueva_lon = data.get('longitude')
 
-        # Verificar que lat y lon sean números válidos
-        try:
-            lat = float(lat)
-            lon = float(lon)
-        except ValueError:
-            return jsonify({'error': 'Latitud y longitud deben ser números válidos.'}), 400
+        if nombre:
+            parada.stop_name = nombre
+        if descripcion:
+            parada.stop_desc = descripcion
+        if tipo:
+            parada.location_type = tipo
 
-        # Convertir latitud y longitud a índice H3
-        try:
-            h3_index = h3.latlng_to_cell(lat, lon, 14)
-        except AttributeError as e:
-            return jsonify({'error': 'Error al convertir a índice H3: ' + str(e)}), 500
-        except Exception as e:
-            return jsonify({'error': 'Error inesperado al convertir a índice H3: ' + str(e)}), 500
+        # Validar si se proporcionan nuevas coordenadas
+        if nueva_lat is not None and nueva_lon is not None:
+            try:
+                nueva_lat = float(nueva_lat)
+                nueva_lon = float(nueva_lon)
+            except ValueError:
+                return jsonify({'error': 'Latitud y longitud deben ser números válidos.'}), 400
 
-        # Verificar si otro registro ya usa el mismo índice H3
-        otra_parada = Stop.query.filter_by(h3_index=h3_index).first()
-        if otra_parada and otra_parada.stop_id != stop_id:
-            return jsonify({'error': 'Otra parada ya ocupa esta ubicación.'}), 400
+            # Convertir lat/lon a un índice H3 y verificar si ya existe otra parada ahí
+            nueva_h3_index = h3.latlng_to_cell(nueva_lat, nueva_lon, 14)
 
-        # Crear el objeto geom usando WKTElement
-        geom = WKTElement(f'POINT({lon} {lat})', srid=4326)
+            if nueva_h3_index != h3_index and Stop.query.filter_by(h3_index=nueva_h3_index).first():
+                return jsonify({'error': 'Ya existe una parada en esta ubicación.'}), 400
 
-        # Actualizar los datos en la base de datos
-        parada.stop_name = nombre
-        parada.stop_desc = descripcion
-        parada.location_type = tipo
-        parada.stop_lat = lat
-        parada.stop_lon = lon
-        parada.h3_index = h3_index
-        parada.geom = geom
+            # Actualizar las coordenadas
+            parada.stop_lat = nueva_lat
+            parada.stop_lon = nueva_lon
+            parada.h3_index = nueva_h3_index
+            parada.geom = WKTElement(f'POINT({nueva_lon} {nueva_lat})', srid=4326)
 
         db.session.commit()
 
-        # Emitir evento para actualizar en tiempo real
+        # Emitir evento en tiempo real para actualizar en frontend
         parada_json = {
             'stop_id': parada.stop_id,
             'stop_name': parada.stop_name,
@@ -205,14 +200,14 @@ def modificar_parada(stop_id):
             'stop_lon': parada.stop_lon,
             'h3_index': parada.h3_index
         }
-        socketio.emit('parada_actualizada', parada_json)
+        emitir_actualizacion_paradas()
+        socketio.emit('parada_modificada', parada_json)
 
-        return jsonify({'status': 'success', 'message': 'Parada actualizada correctamente.'}), 200
+        return jsonify({'status': 'success', 'stop_id': parada.stop_id}), 200
 
     except Exception as e:
         return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
 
-#
 
 # Ruta para obtener todas las paradas
 @app.route('/api/paradas', methods=['GET'])
@@ -229,29 +224,31 @@ def obtener_paradas():
         } for parada in paradas]
         return jsonify(paradas_json)
     except Exception as e:
+        print(f"Error: {e}")  # Mensaje de depuración
         return jsonify({'error': 'Error al obtener las paradas: ' + str(e)}), 500
 
 
 # Ruta para eliminar una parada existente
-@app.route('/api/paradas/<int:stop_id>', methods=['DELETE'])
-def eliminar_parada(stop_id):
+@app.route('/api/paradas/<string:h3_index>', methods=['DELETE'])
+def eliminar_parada(h3_index):
+    print(f"Intentando eliminar la parada con h3_index: {h3_index}")  # Mensaje de depuración
     try:
-        # Buscar la parada en la base de datos
-        parada = Stop.query.get(stop_id)
+        parada = Stop.query.filter_by(h3_index=h3_index).first()
         if not parada:
-            return jsonify({'error': 'La parada no existe.'}), 404
+            print("Parada no encontrada")  # Mensaje de depuración
+            return jsonify({'status': 'error', 'error': 'Parada no encontrada'}), 404
 
-        # Eliminar la parada de la base de datos
         db.session.delete(parada)
         db.session.commit()
-
-        # Emitir evento para actualizar en tiempo real
-        socketio.emit('parada_eliminada', {'stop_id': stop_id})
-
-        return jsonify({'status': 'success', 'message': 'Parada eliminada correctamente.'}), 200
-
+        print("Parada eliminada correctamente")  # Mensaje de depuración
+        # Emitir evento en tiempo real para eliminar la parada en el front
+        emitir_actualizacion_paradas()
+        socketio.emit('parada_eliminada', {'h3_index': h3_index})
+        return jsonify({'status': 'success', 'message': 'Parada eliminada exitosamente.'}), 200
     except Exception as e:
-        return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
+        db.session.rollback()
+        print(f"Error al eliminar la parada: {e}")  # Mensaje de depuración
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 
 #Loggin Geoserver
@@ -276,6 +273,21 @@ def protected():
     # Obtiene la identidad del usuario desde el token
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
+
+def emitir_actualizacion_paradas():
+    """Consulta todas las paradas y las emite a todos los clientes conectados"""
+    paradas = Stop.query.all()
+    paradas_json = [{
+        'stop_id': p.stop_id,
+        'stop_name': p.stop_name,
+        'stop_desc': p.stop_desc,
+        'stop_lat': p.stop_lat,
+        'stop_lon': p.stop_lon,
+        'h3_index': p.h3_index
+    } for p in paradas]
+
+    socketio.emit('actualizar_paradas', paradas_json)
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
