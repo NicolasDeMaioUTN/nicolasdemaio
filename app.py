@@ -124,6 +124,7 @@ class Stop(db.Model):
 def home():
     return "Bienvenido al servidor para sistema de paradas!"
 
+
 #Ruta para pruebas de conexión
 """
 @app.route('/api/test', methods=['GET'])
@@ -187,7 +188,7 @@ def crear_parada():
         geom = WKTElement(f'POINT({lon} {lat})', srid=4326)
 
         # Insertar la nueva parada usando SQLAlchemy
-        nueva_parada = Stop(
+        nueva_parada = Stop.crear(
             stop_name=nombre,
             stop_desc=descripcion,
             stop_lat=lat,
@@ -214,6 +215,78 @@ def crear_parada():
 
     except Exception as e:
         return jsonify({'error': 'Error inesperado: ' + str(e)}), 500
+
+
+# Ruta para leer una parada por su ID de hexagono
+@app.route('/api/paradas/<str:stop_id>', methods=['GET'])
+def obtener_parada(stop_id):
+    try:
+        # Obtener la parada usando el método de clase `leer`
+        parada = Stop.leer(stop_id)
+        if parada:
+            # Convertir la parada a un diccionario
+            parada_dict = {
+                'stop_id': parada.stop_id,
+                'h3_index': parada.h3_index,
+                'stop_name': parada.stop_name,
+                'stop_desc': parada.stop_desc,
+                'stop_lat': parada.stop_lat,
+                'stop_lon': parada.stop_lon,
+                'location_type': parada.location_type,
+            }
+            return jsonify(parada_dict)
+        else:
+            return jsonify({'error': 'Parada no encontrada'}), 404
+    except Exception as e:
+        return jsonify({'error': 'Error al obtener la parada: ' + str(e)}), 500
+
+
+# Ruta para actualizar una parada por su ID de hexagono
+def actualizar_parada(stop_id):
+    try:
+        # Obtener la parada usando el método de clase `leer`
+        parada = Stop.leer(stop_id)
+        if not parada:
+            return jsonify({'error': 'Parada no encontrada'}), 404
+
+        # Obtener los datos enviados en el cuerpo de la solicitud
+        datos_actualizados = request.get_json()
+
+        # Actualizar la parada usando el método de instancia `actualizar`
+        parada.actualizar(**datos_actualizados)
+
+        # Devolver la parada actualizada
+        parada_dict = {
+            'stop_id': parada.stop_id,
+            'h3_index': parada.h3_index,
+            'stop_name': parada.stop_name,
+            'stop_desc': parada.stop_desc,
+            'stop_lat': parada.stop_lat,
+            'stop_lon': parada.stop_lon,
+            'location_type': parada.location_type,
+            'geom': f'POINT({parada.stop_lon} {parada.stop_lat})'  # Formato WKT
+        }
+        return jsonify(parada_dict)
+    except Exception as e:
+        return jsonify({'error': 'Error al actualizar la parada: ' + str(e)}), 500
+
+
+# Ruta para eliminar una parada por su ID
+@app.route('/api/paradas/<str:stop_id>', methods=['DELETE'])
+def eliminar_parada(stop_id):
+    try:
+        # Obtener la parada usando el método de clase `leer`
+        parada = Stop.leer(stop_id)
+        if not parada:
+            return jsonify({'error': 'Parada no encontrada'}), 404
+
+        # Eliminar la parada usando el método de instancia `eliminar`
+        parada.eliminar()
+
+        # Devolver un mensaje de éxito
+        return jsonify({'mensaje': 'Parada eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'error': 'Error al eliminar la parada: ' + str(e)}), 500
 
 
 # Ruta para obtener todas las paradas

@@ -107,18 +107,22 @@ cancelButton.addEventListener('click', function () {
 stopForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
+    // Obtener los valores del formulario
     const stopName = document.getElementById('stop_name').value;
     const stopDesc = document.getElementById('stop_desc').value;
     const stopTipo = document.getElementById('locationType').value;
     const stopLat = parseFloat(document.getElementById('stop_lat').value);
     const stopLon = parseFloat(document.getElementById('stop_lon').value);
 
+    // Crear el objeto con los datos del Stop
     const stopData = {
-        name: stopName,
-        description: stopDesc,
-        tipo: stopTipo,
-        latitude: stopLat,
-        longitude: stopLon,
+        //h3_index: h3Index, // Incluir el campo h3_index
+        stop_name: stopName,
+        stop_desc: stopDesc,
+        location_type: stopTipo, // Cambiar "tipo" a "location_type"
+        stop_lat: stopLat,       // Cambiar "latitude" a "stop_lat"
+        stop_lon: stopLon,       // Cambiar "longitude" a "stop_lon"
+        //geom: `POINT(${stopLon} ${stopLat})` // Crear el campo geom en formato WKT
     };
 
     try {
@@ -128,7 +132,7 @@ stopForm.addEventListener('submit', async (event) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(stopData),
+            body: JSON.stringify(stopData), // Enviar los datos en formato JSON
         });
     
         if (response.ok) {
@@ -139,14 +143,14 @@ stopForm.addEventListener('submit', async (event) => {
             stopForm.classList.add('hidden');
 
         } else {
-            const errorData = await response.text();
+            const errorData = await response.json(); // Leer el error en formato JSON
             console.error('Error en la respuesta:', errorData);
-            alert('Error al guardar la parada.');
+            alert(`Error al guardar la parada: ${errorData.message || 'Error desconocido'}`);
         }
     } catch (error) {
         console.error('Error en la solicitud:', error);
+        alert('Error de conexión con el servidor.');
     }
-    
 });
 
 // Evento para manejar la cancelación del formulario
