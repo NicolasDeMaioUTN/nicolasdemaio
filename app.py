@@ -1,7 +1,9 @@
 import h3
 import os
-from flask import Flask, request, jsonify
+from functools import wraps
+from sqlalchemy.exc import SQLAlchemyError
 from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify
 from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKTElement
 from flask_socketio import SocketIO
@@ -15,24 +17,65 @@ from flask_jwt_extended import (
 
 # Inicialización de la aplicación Flask
 app = Flask(__name__)
-
 # Configuración de JWT
 app.config["JWT_SECRET_KEY"] = "tu_clave_secreta"  # Cambia esto por una clave segura
 jwt = JWTManager(app)
 
+
 # Permitir CORS para todos los orígenes
 CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 # Seleccionar configuración según FLASK_ENV
 config_class = ProductionConfig if os.getenv('FLASK_ENV') == 'production' else DevelopmentConfig
 configure_app(app, config_class)  # Asegúrate de que esta función esté configurando la app correctamente
 
+
 # Inicializar SocketIO y la base de datos
 socketio = SocketIO(app, cors_allowed_origins="*")
 db = SQLAlchemy(app)
 
+
+# Decorador para manejar errores de base de datos
+def manejar_errores_db(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error en la operación de base de datos: {e}")
+            raise e
+    return wrapper
+
+# Decorador para validar datos antes de crear o actualizar un registro
+def validar_datos(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        # Validar que los campos obligatorios estén presentes
+        if not kwargs.get("h3_index"):
+            raise ValueError("El campo 'h3_index' es obligatorio.")
+        if not kwargs.get("stop_name"):
+            raise ValueError("El campo 'stop_name' es obligatorio.")
+        if not kwargs.get("stop_lat") or not kwargs.get("stop_lon"):
+            raise ValueError("Los campos 'stop_lat' y 'stop_lon' son obligatorios.")
+        if not isinstance(kwargs.get("stop_lat"), (int, float)) or not isinstance(kwargs.get("stop_lon"), (int, float)):
+            raise ValueError("Los campos 'stop_lat' y 'stop_lon' deben ser números.")
+        return func(self, *args, **kwargs)
+    return wrapper
+
+# Decorador para registrar cambios en las propiedades
+def registrar_cambios(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if func.__name__ == "actualizar":
+            cambios = {k: v for k, v in kwargs.items() if hasattr(self, k) and getattr(self, k) != v}
+            print(f"Cambios detectados en Stop {self.stop_id}: {cambios}")
+        return func(self, *args, **kwargs)
+    return wrapper
+
 class Stop(db.Model):
-    __tablename__ = 'stops'  # O asegúrate de que coincida con la tabla en la BD
+    __tablename__ = 'stops'  # Asegúrate de que coincida con la tabla en la BD
 
     stop_id = db.Column(db.Integer, primary_key=True)
     h3_index = db.Column(db.String(15), nullable=False, unique=True)
@@ -43,10 +86,43 @@ class Stop(db.Model):
     location_type = db.Column(db.SmallInteger, nullable=True)
     geom = db.Column(Geometry('POINT', srid=4326), nullable=False)
 
+    @classmethod
+    @manejar_errores_db
+    @validar_datos
+    def crear(cls, **kwargs):
+        print(f"Creando Stop: {kwargs}")
+        stop = cls(**kwargs)
+        db.session.add(stop)
+        db.session.commit()
+        return stop
+
+    @classmethod
+    @manejar_errores_db
+    def leer(cls, stop_id):
+        print(f"Leyendo Stop con id: {stop_id}")
+        return cls.query.get(stop_id)
+
+    @manejar_errores_db
+    @validar_datos
+    @registrar_cambios
+    def actualizar(self, **kwargs):
+        print(f"Actualizando Stop {self.stop_id}: {kwargs}")
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        db.session.commit()
+        return self
+
+    @manejar_errores_db
+    def eliminar(self):
+        print(f"Eliminando Stop con id: {self.stop_id}")
+        db.session.delete(self)
+        db.session.commit()
+        return True
+
 
 @app.route('/')
 def home():
-    return "Servidor para sistema de paradas!"
+    return "Bienvenido al servidor para sistema de paradas!"
 
 #Ruta para pruebas de conexión
 """

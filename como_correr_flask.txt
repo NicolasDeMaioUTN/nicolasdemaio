@@ -1,14 +1,22 @@
-cd C:\Users\Nico\Documents\SISTEMA GTFS\Proyecto Paradas
+// Directorios de Entornos Vituales
+cd C:\Users\Nico\Documents\SISTEMA GTFS\Proyecto Paradas -- Oficina
+cd "C:\Users\Admin\OneDrive - UNIVERSIDAD ABIERTA INTERAMERICANA\SISTEMA GTFS\nicolasdemaio" -- Casa
 
-.venv\Scripts\activate
+// Activar scripts
+.venv\Scripts\activate -- Oficina
+.venvCasa\Scripts\activate -- Casa
 
+
+pip install -r requirements.txt -- Aplicar ante cada cambio de lugar de proyecto
 pip freeze > requirements.txt
 
+
+// Correr FLASK
 set FLASK_APP=app.py
-
 set FLASK_ENV=development
-
 flask run
-
-
 // para finalizar Flask usar Control + C
+
+
+// permitir ejecurar scripts locales
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser 
